@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAMT Pastry - Reports and Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f0eb;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #d4bfa0;
+            padding: 24px;
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 48px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #374151;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .nav-item:hover {
+            background-color: #c9b18f;
+        }
+
+        .nav-item.active {
+            background-color: #c9b18f;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background-color: #d1d5db;
+            border-radius: 50%;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .user-role {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 32px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .filter-select {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-select.active {
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .stat-change {
+            color: #10b981;
+            font-size: 14px;
+        }
+
+        .top-product {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .product-image {
+            width: 64px;
+            height: 64px;
+            background-color: #f4a950;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 24px;
+        }
+
+        /* Product Bars */
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .product-item-name {
+            color: #374151;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 28px;
+            background-color: #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #8b6f47;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 14px;
+        }
+
+        /* Donut Chart */
+        .donut-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 48px;
+        }
+
+        .donut-chart {
+            position: relative;
+            width: 250px;
+            height: 250px;
+        }
+
+        .donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .donut-percentage {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .legend-label {
+            color: #374151;
+        }
+
+        /* Membership Report */
+        .report-info {
+            margin-bottom: 16px;
+        }
+
+        .report-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .report-value {
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 250px;
+        }
+
+        .bar-chart-svg {
+            width: 100%;
+            height: 160px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h1>HAMT PASTRY</h1>
+            <nav>
+                <div class="nav-item">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>Product</span>
+                </div>
+                <div class="nav-item">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span>Order</span>
+                </div>
+                <div class="nav-item">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>Customer</span>
+                </div>
+                <div class="nav-item">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+                    </svg>
+                    <span>Voucher</span>
+                </div>
+                <div class="nav-item active">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Reports and Analytics</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h2>REPORTS AND ANALYTICS</h2>
+                <div class="user-info">
+                    <div class="user-avatar"></div>
+                    <div class="user-details">
+                        <div class="user-name">Huyen My</div>
+                        <div class="user-role">Admin</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Filters -->
+                <div class="filters">
+                    <select class="filter-select">
+                        <option>This month</option>
+                    </select>
+                    <select class="filter-select active">
+                        <option>This year</option>
+                    </select>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Sales Revenue</div>
+                        <div class="stat-value">₫ 83.750.000</div>
+                        <div class="stat-change">+9.2% than last month</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label" style="font-weight: bold; font-size: 18px; color: #1f2937;">Top Product</div>
+                        <div class="top-product">
+                            <div class="product-image">🥭</div>
+                            <div class="product-name">PASSION<br>MANGO<br>CHEESE</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Returing Customers</div>
+                        <div class="stat-value" style="font-size: 48px;">42%</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Membership Discount</div>
+                        <div class="stat-value">₫ 5.670.000</div>
+                        <div class="stat-label" style="margin-top: 4px;">66 members</div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <!-- Sale Revenue Chart -->
+                    <div class="chart-card">
+                        <div class="chart-title">Sale Revenue</div>
+                        <svg class="chart-svg" viewBox="0 0 600 250">
+                            <line x1="40" y1="220" x2="560" y2="220" stroke="#e5e7eb" stroke-width="1" />
+                            <line x1="40" y1="170" x2="560" y2="170" stroke="#e5e7eb" stroke-width="1" />
+                            <line x1="40" y1="120" x2="560" y2="120" stroke="#e5e7eb" stroke-width="1" />
+                            <line x1="40" y1="70" x2="560" y2="70" stroke="#e5e7eb" stroke-width="1" />
+                            <line x1="40" y1="20" x2="560" y2="20" stroke="#e5e7eb" stroke-width="1" />
+                            
+                            <text x="15" y="225" font-size="12" fill="#6b7280">0</text>
+                            <text x="10" y="175" font-size="12" fill="#6b7280">20</text>
+                            <text x="10" y="125" font-size="12" fill="#6b7280">40</text>
+                            <text x="10" y="75" font-size="12" fill="#6b7280">60</text>
+                            <text x="10" y="25" font-size="12" fill="#6b7280">80</text>
+
+                            <polyline fill="none" stroke="#8b6f47" stroke-width="2.5" 
+                                points="60,170 102,157.5 144,145 186,150 228,132.5 270,115 312,100 354,90 396,45 438,57.5 480,75 522,90" />
+
+                            <circle cx="60" cy="170" r="3" fill="#8b6f47" />
+                            <circle cx="102" cy="157.5" r="3" fill="#8b6f47" />
+                            <circle cx="144" cy="145" r="3" fill="#8b6f47" />
+                            <circle cx="186" cy="150" r="3" fill="#8b6f47" />
+                            <circle cx="228" cy="132.5" r="3" fill="#8b6f47" />
+                            <circle cx="270" cy="115" r="3" fill="#8b6f47" />
+                            <circle cx="312" cy="100" r="3" fill="#8b6f47" />
+                            <circle cx="354" cy="90" r="3" fill="#8b6f47" />
+                            <circle cx="396" cy="45" r="3" fill="#8b6f47" />
+                            <circle cx="438" cy="57.5" r="3" fill="#8b6f47" />
+                            <circle cx="480" cy="75" r="3" fill="#8b6f47" />
+                            <circle cx="522" cy="90" r="3" fill="#8b6f47" />
+
+                            <text x="55" y="240" font-size="10" fill="#6b7280">Jan</text>
+                            <text x="97" y="240" font-size="10" fill="#6b7280">Feb</text>
+                            <text x="139" y="240" font-size="10" fill="#6b7280">Mar</text>
+                            <text x="181" y="240" font-size="10" fill="#6b7280">Apr</text>
+                            <text x="223" y="240" font-size="10" fill="#6b7280">May</text>
+                            <text x="265" y="240" font-size="10" fill="#6b7280">Jun</text>
+                            <text x="307" y="240" font-size="10" fill="#6b7280">Jul</text>
+                            <text x="349" y="240" font-size="10" fill="#6b7280">Aug</text>
+                            <text x="391" y="240" font-size="10" fill="#6b7280">Sep</text>
+                            <text x="433" y="240" font-size="10" fill="#6b7280">Oct</text>
+                            <text x="475" y="240" font-size="10" fill="#6b7280">Nov</text>
+                            <text x="517" y="240" font-size="10" fill="#6b7280">Dec</text>
+                        </svg>
+                        <div style="text-align: center; font-size: 12px; color: #6b7280; margin-top: 8px;">Months</div>
+                    </div>
+
+                    <!-- Top 5 Products -->
+                    <div class="chart-card">
+                        <div class="chart-title">Top 5 Product</div>
+                        <div class="product-list">
+                            <div>
+                                <div class="product-item-name">Passion Mango Cheese</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 96%;">24%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="product-item-name">Mango Coconut</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 72%;">18%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="product-item-name">Tiramisu De Caramel #2</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 48%;">12%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="product-item-name">Berry Fruit Vanilla</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 32%;">8%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="product-item-name">Creamy Choco</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 24%;">6%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row -->
+                <div class="charts-grid">
+                    <!-- Customer Retention -->
+                    <div class="chart-card">
+                        <div class="chart-title">Customer Retention Rate</div>
+                        <div class="donut-container">
+                            <div class="donut-chart">
+                                <svg viewBox="0 0 200 200" style="transform: rotate(-90deg);">
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="#d4bfa0" stroke-width="40" />
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="#8b6f47" stroke-width="40" 
+                                        stroke-dasharray="290.3 502.4" />
+                                </svg>
+                                <div class="donut-center">
+                                    <div class="donut-percentage">58%</div>
+                                </div>
+                            </div>
+                            <div class="legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #d4bfa0;"></div>
+                                    <div class="legend-label">Returning Customers</div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #8b6f47;"></div>
+                                    <div class="legend-label">New Customers</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Membership Report -->
+                    <div class="chart-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px;">
+                            <div class="chart-title" style="margin: 0;">Membership Report</div>
+                            <div style="color: #9ca3af; font-size: 24px;">⋯</div>
+                        </div>
+                        <div class="report-info">
+                            <div class="report-label">Sales</div>
+                            <div class="report-value">Best day ₫ 1.200.000</div>
+                            <div class="report-label">Product</div>
+                            <div class="report-value">Passion Mango Cheese</div>
+                            <div class="report-label">Returning Customers</div>
+                            <div class="report-value">62%</div>
+                        </div>
+                        <svg class="bar-chart-svg" viewBox="0 0 600 160">
+                            <rect x="50" y="81.6" width="30" height="78.4" fill="#8b6f47" rx="2" />
+                            <rect x="95" y="70.4" width="30" height="89.6" fill="#8b6f47" rx="2" />
+                            <rect x="140" y="78.8" width="30" height="81.2" fill="#8b6f47" rx="2" />
+                            <rect x="185" y="62" width="30" height="98" fill="#8b6f47" rx="2" />
+                            <rect x="230" y="67.6" width="30" height="92.4" fill="#8b6f47" rx="2" />
+                            <rect x="275" y="53.6" width="30" height="106.4" fill="#8b6f47" rx="2" />
+                            <rect x="320" y="42.4" width="30" height="117.6" fill="#8b6f47" rx="2" />
+                            <rect x="365" y="34" width="30" height="126" fill="#8b6f47" rx="2" />
+                            <rect x="410" y="45.2" width="30" height="114.8" fill="#8b6f47" rx="2" />
+                            <rect x="455" y="25.6" width="30" height="134.4" fill="#8b6f47" rx="2" />
+                            <rect x="500" y="14.4" width="30" height="145.6" fill="#8b6f47" rx="2" />
+                            <rect x="545" y="20" width="30" height="140" fill="#8b6f47" rx="2" />
+
+                            <text x="52" y="155" font-size="9" fill="#6b7280" transform="rotate(45 52 155)">Jan</text>
+                            <text x="97" y="155" font-size="9" fill="#6b7280" transform="rotate(45 97 155)">Feb</text>
+                            <text x="142" y="155" font-size="9" fill="#6b7280" transform="rotate(45 142 155)">Mar</text>
+                            <text x="187" y="155" font-size="9" fill="#6b7280" transform="rotate(45 187 155)">Apr</text>
+                            <text x="232" y="155" font-size="9" fill="#6b7280" transform="rotate(45 232 155)">May</text>
+                            <text x="277" y="155" font-size="9" fill="#6b7280" transform="rotate(45 277 155)">Jun</text>
+                            <text x="322" y="155" font-size="9" fill="#6b7280" transform="rotate(45 322 155)">Jul</text>
+                            <text x="367" y="155" font-size="9" fill="#6b7280" transform="rotate(45 367 155)">Aug</text>
+                            <text x="412" y="155" font-size="9" fill="#6b7280" transform="rotate(45 412 155)">Sep</text>
+                            <text x="457" y="155" font-size="9" fill="#6b7280" transform="rotate(45 457 155)">Oct</text>
+                            <text x="502" y="155" font-size="9" fill="#6b7280" transform="rotate(45 502 155)">Nov</text>
+                            <text x="547" y="155" font-size="9" fill="#6b7280" transform="rotate(45 547 155)">Dec</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
