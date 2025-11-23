@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management | HAMT PASTRY</title>
+    <link rel="stylesheet" href="/WEB/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">HAMT PASTRY</div>
+            <nav class="navigation">
+                <ul>
+                    <li class="nav-item">
+                        <i class="fas fa-box-open"></i> Product
+                    </li>
+                    <li class="nav-item">
+                        <i class="fas fa-shopping-cart"></i> Order
+                    </li>
+                    <li class="nav-item active">
+                        <i class="fas fa-users"></i> Customer
+                    </li>
+                    <li class="nav-item">
+                        <i class="fas fa-ticket-alt"></i> Voucher
+                    </li>
+                    <li class="nav-item">
+                        <i class="fas fa-chart-bar"></i> Reports and Analytics
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1 class="page-title">CUSTOMER MANAGEMENT</h1>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <span class="user-name">Huyen My</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                    <div class="user-avatar"></div>
+                </div>
+            </header>
+            
+            <section class="content-section">
+                <div class="stats-cards-container">
+                    <div class="stat-card gold">
+                        <div class="icon-badge gold-bg">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-title">Gold Members</p>
+                            <p class="card-value">14</p>
+                        </div>
+                    </div>
+                    <div class="stat-card silver">
+                        <div class="icon-badge silver-bg">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-title">Silver Members</p>
+                            <p class="card-value">22</p>
+                        </div>
+                    </div>
+                    <div class="stat-card bronze">
+                        <div class="icon-badge bronze-bg">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-title">Bronze Members</p>
+                            <p class="card-value">30</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="customer-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Tier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#1</td>
+                                <td>Trang Nguyen</td>
+                                <td>trangnguyen@gmail.com</td>
+                                <td>0356379834</td>
+                                <td class="tier-gold">Gold</td>
+                            </tr>
+                            <tr>
+                                <td>#2</td>
+                                <td>Duy Phung</td>
+                                <td>duyphung47@gmail.com</td>
+                                <td>0386736592</td>
+                                <td class="tier-bronze">Bronze</td>
+                            </tr>
+                            <tr>
+                                <td>#3</td>
+                                <td>Chi Pham</td>
+                                <td>hachi03@gmail.com</td>
+                                <td>0375898462</td>
+                                <td class="tier-silver">Silver</td>
+                            </tr>
+                            <tr>
+                                <td>#4</td>
+                                <td>Tam Anh</td>
+                                <td>tama265@gmail.com</td>
+                                <td>0976473543</td>
+                                <td class="tier-bronze">Bronze</td>
+                            </tr>
+                            <tr>
+                                <td>#5</td>
+                                <td>Phuong Vu</td>
+                                <td>vtmphuong@gmail.com</td>
+                                <td>0925476945</td>
+                                <td class="tier-gold">Gold</td>
+                            </tr>
+                            <tr>
+                                <td>#6</td>
+                                <td>Bach Vu</td>
+                                <td>dinhbach5@gmail.com</td>
+                                <td>0387257483</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>#7</td>
+                                <td>Hiep Giang</td>
+                                <td>hiepgiang27@gmail.com</td>
+                                <td>0976355491</td>
+                                <td class="tier-silver">Silver</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="button-center">
+                    <button class="view-all-button">View All Customers</button>
+                </div>
+
+            </section>
+        </main>
+    </div>
+</body>
+</html>
