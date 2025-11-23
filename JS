@@ -1,0 +1,116 @@
+// server.js
+const express = require("express");
+const cors = require("cors");
+const sql = require("mssql");
+const path = require("path");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// =====================
+// A) SERVE FRONTEND
+// =====================
+// Cho phép truy cập trực tiếp: http://localhost:3000/Customer.html
+app.use(express.static(path.join(__dirname, "WEB")));
+
+// =====================
+// B) CONNECT SQL SERVER
+// =====================
+const dbConfig = {
+  user: "sa",
+  password: "P@ssw0rd1234!",
+  database: "HamtPastry",
+  server: "localhost",
+  port: 11433,
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+  },
+};
+
+const pool = new sql.ConnectionPool(dbConfig);
+const poolConnect = pool.connect();
+
+async function q(query, params = []) {
+  await poolConnect;
+  const req = pool.request();
+  params.forEach(p => req.input(p.name, p.type, p.value));
+  const result = await req.query(query);
+  return result.recordset;
+}
+
+// =====================
+// C) API ROUTES
+// =====================
+
+// 1. PRODUCTS
+app.get("/api/products", async (req, res) => {
+  try {
+    const data = await q(`
+      SELECT Id AS id, Name AS name, Price, Stock
+      FROM Products
+      ORDER BY Id DESC
+    `);
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "products db error" });
+  }
+});
+
+// 2. ORDERS
+app.get("/api/orders", async (req, res) => {
+  try {
+    const data = await q(`
+      SELECT Id AS id,
+             CustomerName AS customerName,
+             TotalAmount AS totalAmount,
+             Status,
+             CreatedAt
+      FROM Orders
+      ORDER BY Id DESC
+    `);
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "orders db error" });
+  }
+});
+
+// 3. CUSTOMERS
+app.get("/api/customers", async (req, res) => {
+  try {
+    const data = await q(`
+      SELECT Id AS id, Name, Email, Phone, Tier
+      FROM Customers
+      ORDER BY Id DESC
+    `);
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "customers db error" });
+  }
+});
+
+// 4. VOUCHERS
+app.get("/api/vouchers", async (req, res) => {
+  try {
+    const data = await q(`
+      SELECT Id AS id, Code AS code, Description AS [desc], Quantity AS quantity
+      FROM Vouchers
+      ORDER BY Id DESC
+    `);
+    res.json(data);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "vouchers db error" });
+  }
+});
+
+// =====================
+// D) START SERVER
+// =====================
+app.listen(3000, () => {
+  console.log("✅ Server running at http://localhost:3000");
+});
