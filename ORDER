@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Management · HAMT PASTRY</title>
+<style>
+:root{
+  --bg:#f5e6e0;--side:#e8d5c4;--side-b:#d7c0ad;
+  --panel:#fff;--line:#ece2d9;--ink:#2a2a2a;--muted:#7a7066;
+  --btn:#5c3d1f;--accent:#6a4b2f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{display:grid;grid-template-columns:206px 1fr;min-height:100vh}
+
+/* Sidebar */
+.side{background:var(--side);border-right:1px solid var(--side-b);padding:24px 0;position:sticky;top:0;height:100vh}
+.brand{font-weight:800;margin:0 20px 32px;font-size:15px;letter-spacing:0.5px}
+.nav{display:flex;flex-direction:column}
+.nav a{display:flex;align-items:center;gap:12px;padding:14px 20px;color:#3d342b;text-decoration:none;font-size:14px;transition:background .15s}
+.nav a:hover,.nav a.active{background:#d4c4b3;font-weight:500}
+.ico{width:20px;height:20px}
+
+/* Main */
+.main{padding:24px 32px}
+.top{background:#f0e4db;border:1px solid #e5d5c6;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.title{font-weight:800;letter-spacing:1px;font-size:15px}
+.profile{display:flex;align-items:center;gap:12px}
+.profile-text{text-align:right;font-size:13px}
+.profile-text .name{font-weight:600}
+.profile-text .role{font-size:11px;color:#7a7066}
+.avatar{width:36px;height:36px;border-radius:50%;background:#c6ad96}
+.hr{height:1px;background:#d7c0ad;margin:0 0 20px}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:24px}
+.tab{padding:12px 32px;background:#d7c0ad;color:#3d342b;border:none;cursor:pointer;font-size:14px;font-weight:500;transition:background .15s}
+.tab:first-child{border-radius:8px 0 0 8px}
+.tab:last-child{border-radius:0 8px 8px 0}
+.tab.active{background:var(--btn);color:#fff}
+.tab:hover:not(.active){background:#cbb79e}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px}
+.stat-card{background:#fff;border:2px solid #333;border-radius:12px;padding:24px;text-align:center}
+.stat-card h3{font-size:16px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.stat-card .num{font-size:36px;font-weight:700;color:var(--ink)}
+
+/* Table */
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.thead{background:#e8d5c4;padding:16px 24px;display:grid;grid-template-columns:120px 1fr 200px 120px;gap:20px;font-weight:600;font-size:13px;color:#6f5439}
+.tbody .row{padding:16px 24px;display:grid;grid-template-columns:120px 1fr 200px 120px;gap:20px;border-bottom:1px solid #f9f4f0;align-items:center}
+.tbody .row:last-child{border-bottom:none}
+.tbody .row:hover{background:#fdfbf9}
+
+/* Feedback specific */
+.thead-fb{grid-template-columns:100px 1fr 2fr 100px}
+.tbody-fb .row{grid-template-columns:100px 1fr 2fr 100px}
+.comment{font-size:13px;color:#555;line-height:1.4}
+.status{display:inline-block;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600}
+.status.shipped{background:#d4f4dd;color:#166534}
+.status.delivered{background:#dbeafe;color:#1e40af}
+.status.pending{background:#fef3c7;color:#92400e}
+.status.new{background:#fed7aa;color:#9a3412}
+.status.reviewed{background:#e5e7eb;color:#374151}
+
+/* Button */
+.btn-view{background:var(--btn);color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:block;margin:24px auto 0;transition:background .15s}
+.btn-view:hover{background:#4a3118}
+
+.empty{text-align:center;padding:60px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">HAMT PASTRY</div>
+    <nav class="nav">
+      <a href="#">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7h18M5 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"/>
+          <path d="M8 7V5a2 2 0 1 1 4 0v2M12 7V5a2 2 0 1 1 4 0v2"/>
+        </svg>
+        Product
+      </a>
+      <a class="active" href="#">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7h18M6 7v10h12V7M8 11h8M8 15h5"/>
+        </svg>
+        Order
+      </a>
+      <a href="#">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="3"/>
+          <path d="M4 20a8 8 0 0 1 16 0"/>
+        </svg>
+        Customer
+      </a>
+      <a href="#">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M7 7h10l2 4-7 7-7-7 2-4z"/>
+        </svg>
+        Voucher
+      </a>
+      <a href="#">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3v18h18M7 13l4 4 7-9"/>
+        </svg>
+        Reports and Analytics
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div class="title">ORDER MANAGEMENT</div>
+      <div class="profile">
+        <div class="profile-text">
+          <div class="name">Huyen My</div>
+          <div class="role">Admin</div>
+        </div>
+        <div class="avatar"></div>
+      </div>
+    </div>
+    <div class="hr"></div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('order')">Order</button>
+      <button class="tab" onclick="showTab('feedback')">Customer Feedback</button>
+    </div>
+
+    <!-- Order Tab -->
+    <div id="orderTab">
+      <div class="card">
+        <div class="thead">
+          <div>Order ID</div>
+          <div>Customer</div>
+          <div>Total</div>
+          <div>Status</div>
+        </div>
+        <div class="tbody" id="orderList"></div>
+      </div>
+      <button class="btn-view" onclick="alert('View all orders')">View All Orders</button>
+    </div>
+
+    <!-- Feedback Tab -->
+    <div id="feedbackTab" style="display:none">
+      <div class="stats">
+        <div class="stat-card">
+          <h3>Total Feedback</h3>
+          <div class="num">320</div>
+        </div>
+        <div class="stat-card">
+          <h3>New Comments</h3>
+          <div class="num">25</div>
+        </div>
+        <div class="stat-card">
+          <h3>Reviewed</h3>
+          <div class="num">295</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="thead thead-fb">
+          <div>Order ID</div>
+          <div>Customer</div>
+          <div>Comment</div>
+          <div>Status</div>
+        </div>
+        <div class="tbody tbody-fb" id="feedbackList"></div>
+      </div>
+      <button class="btn-view" onclick="alert('View all feedback')">View All Feedback</button>
+    </div>
+  </main>
+</div>
+
+<script>
+const orders=[
+  {id:1201,customer:'Trang Nguyen',total:625000,status:'shipped'},
+  {id:1202,customer:'Hiep Giang',total:650000,status:'shipped'},
+  {id:1203,customer:'Phuong Vu',total:625000,status:'delivered'},
+  {id:1204,customer:'Chi Pham',total:678000,status:'delivered'},
+  {id:1205,customer:'Long Hoang',total:665000,status:'pending'},
+  {id:1206,customer:'Bach Vu',total:657000,status:'pending'}
+];
+
+const feedbacks=[
+  {id:1201,customer:'Trang Nguyen',comment:'The delivery was faster than I expected! The pastries arrived...',status:'new'},
+  {id:1200,customer:'Hiep Giang',comment:'Customer support was very kind and helped me change my...',status:'new'},
+  {id:1199,customer:'Tam Anh',comment:'The design of the birthday cake was gorgeous, but the cream...',status:'new'},
+  {id:1198,customer:'Duy Phung',comment:'Delivery came super fast, love how fresh everything was!',status:'new'},
+  {id:1197,customer:'Duc Anh',comment:'The new chocolate croissant is sooo good. Please keep it on...',status:'reviewed'},
+  {id:1196,customer:'Viet Hung',comment:'Staff was super friendly when I picked up my order. Thanks guys',status:'reviewed'},
+  {id:1195,customer:'Hai Anh',comment:'It would be nice if you could add more vegan options to the...',status:'reviewed'}
+];
+
+const fmt=n=>Number(n).toLocaleString('vi-VN');
+
+function renderOrders(){
+  document.getElementById('orderList').innerHTML=orders.map(o=>`
+    <div class="row">
+      <div>#${o.id}</div>
+      <div style="font-weight:500">${o.customer}</div>
+      <div>${fmt(o.total)}</div>
+      <div><span class="status ${o.status}">${o.status.charAt(0).toUpperCase()+o.status.slice(1)}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderFeedbacks(){
+  document.getElementById('feedbackList').innerHTML=feedbacks.map(f=>`
+    <div class="row">
+      <div>#${f.id}</div>
+      <div style="font-weight:500">${f.customer}</div>
+      <div class="comment">${f.comment}</div>
+      <div><span class="status ${f.status}">${f.status.charAt(0).toUpperCase()+f.status.slice(1)}</span></div>
+    </div>
+  `).join('');
+}
+
+function showTab(tab){
+  const tabs=document.querySelectorAll('.tab');
+  tabs.forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if(tab==='order'){
+    document.getElementById('orderTab').style.display='block';
+    document.getElementById('feedbackTab').style.display='none';
+  }else{
+    document.getElementById('orderTab').style.display='none';
+    document.getElementById('feedbackTab').style.display='block';
+  }
+}
+
+renderOrders();
+renderFeedbacks();
+</script>
+</body>
+</html>
